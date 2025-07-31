@@ -8,7 +8,12 @@
 </div>
 
 Slack Private Channel Archive Tool helps users securely archive Slack private channels. This tool provides OAuth authorization, channel list management, batch selection, and archive operations. 
+
+## Default Configuration
+
 **The current default version archives Private Channels and only filters channels created by the authorized user. For specific needs to operate on private channels or public channels, you can configure according to your requirements.**
+
+> 💡 **Configuration Tip**: To modify channel types or filtering conditions, please refer to the [Configuration Guide](CONFIGURATION.md) for custom settings.
 
 ## Features
 
