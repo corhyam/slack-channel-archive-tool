@@ -34,6 +34,9 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 ## 页面展示
 
 ### 主页面
+![主页面第三版](screenshots/index_third_version.png)
+**当前版本** - 采用Slack品牌配色方案，白色背景配合紫色渐变头部。
+
 ![主页面第二版](screenshots/index_second_version.png)
 ![主页面第一版](screenshots/index_first_version.png)
 应用的主页面，提供Slack授权入口和功能介绍。
@@ -43,7 +46,7 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 显示所有可归档的私有频道，支持批量选择和查看频道详细信息。
 
 ### 确认归档
-![确认归档](screenshots/comfirm_archive.png)
+![确认归档](screenshots/confirm_archive.png)
 归档操作前的确认页面，显示选中的频道列表供用户最终确认。
 
 ### 归档结果

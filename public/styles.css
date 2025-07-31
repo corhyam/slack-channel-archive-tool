@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: #ffffff;
+    background: #ffffff; /* 白色背景 */
     min-height: 100vh;
     color: #1a1a1a;
     line-height: 1.6;
@@ -23,11 +23,12 @@ body {
 .header {
     text-align: center;
     margin-bottom: 40px;
-    color: #1a1a1a;
-    background: linear-gradient(135deg, #6b46c1 0%, #8b5cf6 100%);
+    color: #ffffff;
+    background: linear-gradient(135deg, #4a154b 0%, #611f69 100%); /* Slack 品牌紫色渐变 */
     padding: 40px 20px;
     border-radius: 12px;
     margin-bottom: 30px;
+    border: 1px solid #3a1b3a;
 }
 
 .logo {
@@ -70,21 +71,21 @@ body {
 
 /* 卡片样式 - Slack 风格 */
 .card {
-    background: #ffffff;
+    background: #ffffff; /* 白色卡片背景 */
     border: 1px solid #e8e8e8;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 12px; /* Slack 风格的圆角 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 .card-header {
-    background: #6b46c1;
+    background: #4a154b; /* Slack 品牌紫色 */
     color: white;
     padding: 20px 25px;
     display: flex;
@@ -107,9 +108,9 @@ body {
 }
 
 .permissions-info {
-    background: #f8f9fa;
+    background: #f8f9fa; /* 浅灰色背景 */
     border: 1px solid #e1e4e8;
-    border-radius: 6px;
+    border-radius: 8px; /* Slack 风格圆角 */
     padding: 1.2rem;
     margin-bottom: 1.5rem;
 }
@@ -136,10 +137,10 @@ body {
 }
 
 .permissions-list code {
-    background: #6b46c1;
+    background: #4a154b; /* Slack 品牌紫色 */
     color: white;
     padding: 0.25rem 0.5rem;
-    border-radius: 3px;
+    border-radius: 4px; /* Slack 风格圆角 */
     font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
     font-size: 0.85rem;
     font-weight: 500;
@@ -153,7 +154,7 @@ body {
 }
 
 .info-section h3 {
-    color: #6b46c1;
+    color: #4a154b; /* Slack 品牌紫色 */
     margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
@@ -185,8 +186,8 @@ body {
 .auth-action {
     text-align: center;
     padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 6px;
+    background: #f8f9fa; /* 浅灰色背景 */
+    border-radius: 8px; /* Slack 风格圆角 */
     border: 1px solid #e1e4e8;
 }
 
@@ -263,14 +264,14 @@ body {
 }
 
 .btn-primary {
-    background: #6b46c1;
+    background: #4a154b; /* Slack 品牌紫色 */
     color: white;
-    border-color: #6b46c1;
+    border-color: #4a154b;
 }
 
 .btn-primary:hover {
-    background: #8b5cf6;
-    border-color: #8b5cf6;
+    background: #611f69; /* Slack 品牌紫色深色 */
+    border-color: #611f69;
 }
 
 .btn-secondary {
@@ -321,7 +322,7 @@ body {
 
 .loading i {
     font-size: 1.3rem;
-    color: #6b46c1;
+    color: #4a154b; /* Slack 品牌紫色 */
 }
 
 /* 频道列表 - Slack 风格 */
@@ -336,27 +337,27 @@ body {
     align-items: center;
     gap: 12px;
     padding: 16px;
-    background: #ffffff;
+    background: #ffffff; /* 白色背景 */
     border: 1px solid #e1e4e8;
-    border-radius: 6px;
+    border-radius: 8px; /* Slack 风格圆角 */
     transition: all 0.2s ease;
     cursor: pointer;
 }
 
 .channel-item:hover {
-    border-color: #6b46c1;
+    border-color: #4a154b; /* Slack 品牌紫色 */
     background: #f8f9fa;
 }
 
 .channel-item.selected {
-    border-color: #6b46c1;
+    border-color: #4a154b; /* Slack 品牌紫色 */
     background: #f0f4ff;
 }
 
 .channel-item input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #6b46c1;
+    accent-color: #4a154b; /* Slack 品牌紫色 */
 }
 
 .channel-info {
@@ -402,14 +403,14 @@ body {
 .summary {
     background: #f0f4ff;
     border: 1px solid #c1d4f0;
-    border-radius: 6px;
+    border-radius: 8px; /* Slack 风格圆角 */
     padding: 12px;
     margin-top: 16px;
 }
 
 .summary p {
     font-weight: 500;
-    color: #6b46c1;
+    color: #4a154b; /* Slack 品牌紫色 */
     font-size: 0.9rem;
 }
 
@@ -417,7 +418,7 @@ body {
 .warning {
     background: #fff3cd;
     border: 1px solid #ffeaa7;
-    border-radius: 6px;
+    border-radius: 8px; /* Slack 风格圆角 */
     padding: 16px;
     margin-bottom: 16px;
     display: flex;
@@ -605,17 +606,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #f1f1f1; /* 浅灰色背景 */
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: #4a154b; /* Slack 品牌紫色 */
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    background: #611f69; /* Slack 品牌紫色深色 */
 }
 
 /* 响应式设计补充 */
