@@ -22,7 +22,7 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 - ✅ **批量选择** - 支持全选/取消全选，方便批量操作
 - 🗄️ **一键归档** - 安全地归档选中的频道
 - 📊 **操作结果反馈** - 详细的成功/失败结果展示
-- 🎨 **现代化 UI** - 响应式设计，支持移动端访问
+- 🎨 **UI** - 响应式设计，支持移动端访问
 - ⚡ **实时状态** - 显示频道状态（活跃/已归档）
 
 ## 页面展示
@@ -49,7 +49,7 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 - **后端**: Node.js + Express
 - **前端**: 原生 JavaScript + CSS3
 - **API**: Slack Web API
-- **样式**: 现代化 CSS + Font Awesome 图标
+- **样式**: CSS + Font Awesome 图标
 
 ## 环境要求
 
