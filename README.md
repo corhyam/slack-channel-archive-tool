@@ -2,12 +2,14 @@
 
 <div align="center">
 
+[![Node.js Version](https://img.shields.io/badge/Node-%3E%3D18.17.0-brightgreen)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-blue.svg)](https://expressjs.com/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![CSS3](https://img.shields.io/badge/CSS3-3.x-1572B6.svg)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![Slack API](https://img.shields.io/badge/Slack%20API-Web%20API-orange.svg)](https://api.slack.com/)
+
 [![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README_EN.md)
 [![中文](https://img.shields.io/badge/Language-中文-green?style=for-the-badge)](README.md)
-
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
 
 </div>
 
@@ -50,22 +52,12 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 
 ## 技术栈
 
-![Node.js](https://img.shields.io/badge/Node.js-18.17.0+-green?style=for-the-badge)
-![Express](https://img.shields.io/badge/Express-4.x-blue?style=for-the-badge)
-![Slack API](https://img.shields.io/badge/Slack%20API-Web%20API-orange?style=for-the-badge)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge)
-![CSS3](https://img.shields.io/badge/CSS3-3.x-1572B6?style=for-the-badge&logo=css3)
-
-
 - **后端**: Node.js + Express
 - **前端**: 原生 JavaScript + CSS3
 - **API**: Slack Web API
 - **样式**: CSS + Font Awesome 图标
 
 ## 环境要求
-
-![Node.js](https://img.shields.io/badge/Node.js-18.17.0+-green?style=for-the-badge)
-![npm](https://img.shields.io/badge/npm-8.0.0+-red?style=for-the-badge&logo=npm)
 
 - **Node.js**: >= 18.17.0
 - **npm**: >= 8.0.0
