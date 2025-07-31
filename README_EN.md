@@ -130,6 +130,9 @@ SLACK_REDIRECT_URI=https://localhost:3000/auth/callback
 PORT=3000
 NODE_ENV=development
 USE_HTTPS=true
+
+# Encryption Configuration (optional, auto-generated if not set)
+# ENCRYPTION_KEY=your_32_byte_encryption_key
 ```
 
 **Production Environment Configuration**:
@@ -143,6 +146,9 @@ SLACK_REDIRECT_URI=https://your-domain.com/auth/callback
 PORT=3000
 NODE_ENV=production
 USE_HTTPS=false
+
+# Encryption Configuration (recommended for security)
+ENCRYPTION_KEY=your_32_byte_encryption_key
 ```
 
 **Note**: 
@@ -205,19 +211,24 @@ Visit `https://localhost:3000` to start using the application.
 ## API Endpoints
 
 ### Authentication
-- `GET /auth/slack` - Start OAuth authorization flow
+- `GET /auth` - Start OAuth authorization flow
 - `GET /auth/callback` - OAuth callback handling
 
 ### Channel Management
 - `GET /api/channels?token_id=<id>` - Get private channel list
 - `POST /api/archive` - Archive selected channels
 
+### Debug Endpoints (Development Only)
+- `GET /debug/token/:tokenId` - View token basic information (no sensitive data exposed)
+
 ## Security Considerations
 
 - Uses OAuth 2.0 flow, no need to store user passwords
-- Tokens are temporarily stored and automatically expire after 1 hour
+- Tokens are encrypted and automatically expire after 5 minutes
 - Regular cleanup of expired tokens
 - All API calls are authenticated
+- Debug endpoints are only available in development environment
+- Sensitive information is not exposed in logs
 
 ## Development Guide
 
@@ -234,6 +245,7 @@ slack-channel-archive-tool/
 ├── README_EN.md           # English documentation
 ├── QUICKSTART.md          # Quick start guide
 ├── QUICKSTART_EN.md       # English quick start guide
+├── CONFIGURATION.md       # Configuration guide
 ├── DEPLOYMENT.md          # Deployment guide
 ├── LICENSE                # License file
 ├── screenshots/           # Page screenshots

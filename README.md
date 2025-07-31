@@ -71,7 +71,7 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 
 ```bash
 git clone <repository-url>
-cd slack-archive-tool
+cd slack-channel-archive-tool
 ```
 
 ### 2. 安装依赖
@@ -130,6 +130,9 @@ SLACK_REDIRECT_URI=https://localhost:3000/auth/callback
 PORT=3000
 NODE_ENV=development
 USE_HTTPS=true
+
+# 加密配置（可选，不设置会自动生成）
+# ENCRYPTION_KEY=your_32_byte_encryption_key
 ```
 
 **生产环境配置**：
@@ -143,6 +146,9 @@ SLACK_REDIRECT_URI=https://your-domain.com/auth/callback
 PORT=3000
 NODE_ENV=production
 USE_HTTPS=false
+
+# 加密配置（建议设置，提高安全性）
+ENCRYPTION_KEY=your_32_byte_encryption_key
 ```
 
 **注意**: 
@@ -205,25 +211,30 @@ npm start
 ## API 端点
 
 ### 认证相关
-- `GET /auth/slack` - 启动 OAuth 授权流程
+- `GET /auth` - 启动 OAuth 授权流程
 - `GET /auth/callback` - OAuth 回调处理
 
 ### 频道管理
 - `GET /api/channels?token_id=<id>` - 获取私有频道列表
 - `POST /api/archive` - 归档选中的频道
 
+### 调试端点（仅开发环境）
+- `GET /debug/token/:tokenId` - 查看Token基本信息（不暴露敏感数据）
+
 ## 安全考虑
 
 - 使用 OAuth 2.0 流程，无需存储用户密码
-- Token 临时存储，1小时后自动过期
+- Token 加密存储，5分钟后自动过期
 - 定期清理过期的 token
 - 所有 API 调用都经过验证
+- 调试端点仅在开发环境可用
+- 敏感信息不会在日志中暴露
 
 ## 开发说明
 
 ### 项目结构
 ```
-slack-archive-tool/
+slack-channel-archive-tool/
 ├── server.js              # Express HTTPS 服务器
 ├── package.json           # 项目配置
 ├── package-lock.json      # 依赖锁定文件
