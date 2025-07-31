@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slack Private Channel Archiving Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fab fa-slack"></i>
+                <h1>Slack Private Channel Archiving Tool</h1>
+            </div>
+            <p class="subtitle">Securely archive your private channels with ease</p>
+        </header>
+
+        <main class="main-content">
+            <!-- 授权步骤 -->
+            <div id="auth-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-key"></i>
+                        <h2>Step 1: Authorize Access</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="permissions-info">
+                            <h3><i class="fas fa-shield-alt"></i> Required Permissions</h3>
+                            <p>We will request basic permissions from your Slack workspace. The following permissions will not read your channel content:</p>
+                            <div class="permissions-list">
+                                <code>channels:read</code>
+                                <code>channels:write</code>
+                                <code>groups:read</code>
+                                <code>groups:write</code>
+                            </div>
+                        </div>
+                        
+                        <div class="auth-info">
+                            <div class="info-section">
+                                <h3><i class="fas fa-info-circle"></i> What this tool does:</h3>
+                                <ul>
+                                    <li>Lists all private channels you've created in your Slack workspace</li>
+                                    <li>Allows you to select specific channels for archiving</li>
+                                    <li>Provides a safe way to clean up old project channels</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h3><i class="fas fa-lock"></i> Security & Privacy:</h3>
+                                <ul>
+                                    <li>Uses official Slack OAuth for secure authentication</li>
+                                    <li>Only accesses channels you've created</li>
+                                    <li>Tokens are encrypted and stored temporarily until your archiving session ends</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="auth-action">
+                            <p>Click the button below to authorize access to your Slack workspace.</p>
+                            <button id="auth-btn" class="btn btn-primary btn-large">
+                                <i class="fab fa-slack"></i>
+                                Authorize Slack Access
+                            </button>
+                            <p class="auth-note">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                You'll be redirected to Slack to grant permissions, then returned here automatically.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 频道列表步骤 -->
+            <div id="channels-section" class="section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-list"></i>
+                        <h2>Step 2: Select Channels to Archive</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="controls">
+                            <button id="refresh-btn" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh List
+                            </button>
+                        </div>
+                        
+                        <div class="loading" id="loading-channels">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Loading channel list...</span>
+                        </div>
+                        
+                        <div id="channels-list" class="channels-list"></div>
+                        
+                        <div class="summary" id="summary">
+                            <p><span id="selected-count">0</span> channels selected</p>
+                            <button id="confirm-selection-btn" class="btn btn-primary" style="margin-top: 15px; display: none;">
+                                <i class="fas fa-check"></i>
+                                Confirm Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 归档步骤 -->
+            <div id="archive-section" class="section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-archive"></i>
+                        <h2>Step 3: Confirm Archive</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p><strong>警告 / Warning:</strong> 归档后的频道将无法发送新消息，但历史消息仍然可以查看。<br>
+                            <strong>Warning:</strong> Archived channels cannot send new messages, but historical messages can still be viewed.</p>
+                        </div>
+                        
+                        <div id="selected-channels-summary"></div>
+                        
+                        <div class="actions">
+                            <button id="back-btn" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Back to Selection
+                            </button>
+                            <button id="archive-btn" class="btn btn-danger">
+                                <i class="fas fa-archive"></i>
+                                Confirm Archive Selected Channels
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果展示 -->
+            <div id="results-section" class="section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>Archive Results</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="results-content"></div>
+                        <button id="new-session-btn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Start New Archive Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+
+
+        <!-- 错误提示 -->
+        <div id="error-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Error</h3>
+                    <button class="close-btn" onclick="closeErrorModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="error-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="closeErrorModal()">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 确认归档弹框 -->
+        <div id="confirm-archive-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle" style="color: #f59e0b; margin-right: 8px;"></i>Confirm Archive</h3>
+                    <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                    <button class="btn btn-danger" onclick="confirmArchive()">Confirm Archive</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
