@@ -7,7 +7,8 @@
 
 </div>
 
-一个现代化的 Web 应用，帮助用户安全地归档 Slack 私有频道。该工具提供了直观的用户界面，支持 OAuth 授权、频道列表查看、批量选择和归档操作。
+Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频道。该工具提供支持 OAuth 授权、频道列表查看、批量选择和归档操作。
+**当前默认版本为归档 Private Channel 且列表仅过滤出授权者创建的 channel，具体需要操作私有频道或公共频道，可根据需求自己配置。**
 
 ## 功能特性
 
@@ -193,16 +194,20 @@ slack-archive-tool/
 ├── server.js              # Express HTTPS 服务器
 ├── package.json           # 项目配置
 ├── package-lock.json      # 依赖锁定文件
-├── .gitignore            # Git 忽略文件
-├── env.example           # 环境变量示例
-├── env.local.example     # 本地环境变量示例
-├── README.md             # 项目说明
-├── DEPLOYMENT.md         # 部署说明
-├── LICENSE               # 许可证文件
-└── public/               # 静态文件
-    ├── index.html        # 主页面
-    ├── styles.css        # 样式文件
-    └── script.js         # 前端逻辑
+├── .gitignore             # Git 忽略文件
+├── env.example            # 环境变量示例
+├── env.local.example      # 本地环境变量示例
+├── README.md              # 项目说明
+├── README_EN.md           # 英文文档
+├── QUICKSTART.md          # 快速开始指南
+├── QUICKSTART_EN.md       # 英文快速开始指南
+├── CONFIGURATION.md       # 配置说明文档
+├── DEPLOYMENT.md          # 部署说明
+├── LICENSE                # 许可证文件
+└── public/                # 静态文件
+    ├── index.html         # 主页面
+    ├── styles.css         # 样式文件
+    └── script.js          # 前端逻辑
 ```
 
 ### 重要文件说明
@@ -222,6 +227,35 @@ slack-archive-tool/
 
 #### 自定义样式
 编辑 `public/styles.css` 文件来自定义界面样式。
+
+#### 频道类型配置
+当前默认配置为仅显示私有频道且仅显示授权者创建的频道。如需调整，可修改 `server.js` 中的相关配置：
+
+**获取频道列表的配置**（第 150-160 行左右）：
+```javascript
+// 获取私有频道列表
+const channelsResponse = await axios.get('https://slack.com/api/conversations.list', {
+  headers: {
+    'Authorization': `Bearer ${decryptedToken}`
+  },
+  params: {
+    types: 'private_channel',  // 可改为 'public_channel' 或 'private_channel,public_channel'
+    exclude_archived: true
+  }
+});
+
+// 过滤频道（第 170-175 行左右）
+const filteredChannels = channelsResponse.data.channels.filter(channel => {
+  return channel.creator === currentUserId;  // 移除此条件可显示所有频道
+});
+```
+
+**配置选项说明**：
+- `types: 'private_channel'` - 仅私有频道
+- `types: 'public_channel'` - 仅公共频道  
+- `types: 'private_channel,public_channel'` - 私有和公共频道
+- `channel.creator === currentUserId` - 仅显示当前用户创建的频道
+- 移除过滤条件 - 显示所有频道
 
 ## 故障排除
 

@@ -7,7 +7,8 @@
 
 </div>
 
-A modern web application that helps users securely archive Slack private channels. This tool provides an intuitive user interface with OAuth authorization, channel list management, batch selection, and archive operations.
+Slack Private Channel Archive Tool helps users securely archive Slack private channels. This tool provides OAuth authorization, channel list management, batch selection, and archive operations. 
+**The current default version archives Private Channels and only filters channels created by the authorized user. For specific needs to operate on private channels or public channels, you can configure according to your requirements.**
 
 ## Features
 
@@ -193,19 +194,19 @@ slack-channel-archive-tool/
 ├── server.js              # Express HTTPS server
 ├── package.json           # Project configuration
 ├── package-lock.json      # Dependency lock file
-├── .gitignore            # Git ignore file
-├── env.example           # Environment variables example
-├── env.local.example     # Local environment variables example
-├── README.md             # Project documentation
-├── README_EN.md          # English documentation
-├── QUICKSTART.md         # Quick start guide
-├── QUICKSTART_EN.md      # English quick start guide
-├── DEPLOYMENT.md         # Deployment guide
-├── LICENSE               # License file
-└── public/               # Static files
-    ├── index.html        # Main page
-    ├── styles.css        # Style file
-    └── script.js         # Frontend logic
+├── .gitignore             # Git ignore file
+├── env.example            # Environment variables example
+├── env.local.example      # Local environment variables example
+├── README.md              # Project documentation
+├── README_EN.md           # English documentation
+├── QUICKSTART.md          # Quick start guide
+├── QUICKSTART_EN.md       # English quick start guide
+├── DEPLOYMENT.md          # Deployment guide
+├── LICENSE                # License file
+└── public/                # Static files
+    ├── index.html         # Main page
+    ├── styles.css         # Style file
+    └── script.js          # Frontend logic
 ```
 
 ### Important File Notes
@@ -225,6 +226,35 @@ Edit the `PORT` variable in the `.env` file.
 
 #### Custom Styling
 Edit the `public/styles.css` file to customize interface styles.
+
+#### Channel Type Configuration
+The current default configuration only displays private channels and only shows channels created by the authorized user. To adjust this, you can modify the relevant configuration in `server.js`:
+
+**Channel List Retrieval Configuration** (around lines 150-160):
+```javascript
+// Get private channel list
+const channelsResponse = await axios.get('https://slack.com/api/conversations.list', {
+  headers: {
+    'Authorization': `Bearer ${decryptedToken}`
+  },
+  params: {
+    types: 'private_channel',  // Can be changed to 'public_channel' or 'private_channel,public_channel'
+    exclude_archived: true
+  }
+});
+
+// Filter channels (around lines 170-175)
+const filteredChannels = channelsResponse.data.channels.filter(channel => {
+  return channel.creator === currentUserId;  // Remove this condition to show all channels
+});
+```
+
+**Configuration Options**:
+- `types: 'private_channel'` - Private channels only
+- `types: 'public_channel'` - Public channels only
+- `types: 'private_channel,public_channel'` - Both private and public channels
+- `channel.creator === currentUserId` - Only show channels created by current user
+- Remove filter condition - Show all channels
 
 ## Troubleshooting
 
