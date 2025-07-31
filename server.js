@@ -1,22 +1,37 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 const crypto = require('crypto');
+const https = require('https');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 环境检测
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const USE_HTTPS = process.env.USE_HTTPS === 'true' || NODE_ENV === 'development';
+
+// SSL 证书配置（仅本地开发时使用）
+let httpsOptions = null;
+if (USE_HTTPS && NODE_ENV === 'development') {
+  try {
+    httpsOptions = {
+      key: fs.readFileSync('./key.pem'),
+      cert: fs.readFileSync('./cert.pem')
+    };
+  } catch (error) {
+    console.warn('⚠️  未找到 SSL 证书文件，请运行以下命令生成：');
+    console.warn('   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes');
+    console.warn('   或者设置 USE_HTTPS=false 使用 HTTP 模式');
+  }
+}
+
 // 中间件
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-
-// 安全头设置
-app.use((req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
 
 // 加密密钥
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32);
@@ -32,7 +47,7 @@ function encryptToken(token) {
   let encrypted = cipher.update(token, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   const authTag = cipher.getAuthTag();
-  return {
+return {
     encrypted,
     iv: iv.toString('hex'),
     authTag: authTag.toString('hex')
@@ -52,6 +67,14 @@ function decryptToken(encryptedData) {
 function generateSecureTokenId() {
   return crypto.randomBytes(32).toString('hex');
 }
+
+// 安全头
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 // 主页
 app.get('/', (req, res) => {
@@ -285,19 +308,40 @@ setInterval(() => {
   }
 }, 300000); // 每5分钟清理一次
 
-// 启动 HTTP 服务器
-app.listen(PORT, () => {
-  console.log(`🚀 HTTP 服务器运行在 http://localhost:${PORT}`);
-  console.log('请确保已配置 .env 文件中的 Slack App 凭据');
-});
+// 根据环境启动服务器
+if (USE_HTTPS && httpsOptions) {
+  // 本地开发 HTTPS 模式
+  const httpsServer = https.createServer(httpsOptions, app);
+  
+  httpsServer.listen(PORT, () => {
+    console.log(`🚀 Slack 频道归档工具已启动`);
+    console.log(`🔒 HTTPS 服务器运行在 https://localhost:${PORT}`);
+    console.log('📋 请确保已配置 .env 文件中的 Slack App 凭据');
+    console.log('⚠️  注意：浏览器可能会显示安全警告，请点击"高级"→"继续访问"');
+    console.log('🔗 访问 https://localhost:3000 开始使用');
+  });
 
-// 处理进程退出
-process.on('SIGINT', () => {
-  console.log('\n正在关闭服务器...');
-  process.exit(0);
-});
+  // 处理进程退出
+  process.on('SIGINT', () => {
+    console.log('\n正在关闭服务器...');
+    httpsServer.close(() => {
+      console.log('服务器已关闭');
+      process.exit(0);
+    });
+  });
+} else {
+  // 生产环境 HTTP 模式（由 Cloudflare 等代理处理 HTTPS）
+  app.listen(PORT, () => {
+    console.log(`🚀 Slack 频道归档工具已启动`);
+    console.log(`🌐 HTTP 服务器运行在 http://localhost:${PORT}`);
+    console.log('📋 请确保已配置 .env 文件中的 Slack App 凭据');
+    console.log('🔗 通过 Cloudflare 代理访问您的域名');
+    console.log(`💡 本地访问: http://localhost:${PORT}`);
+  });
 
-process.on('SIGTERM', () => {
-  console.log('\n正在关闭服务器...');
-  process.exit(0);
-});
+  // 处理进程退出
+  process.on('SIGINT', () => {
+    console.log('\n正在关闭服务器...');
+    process.exit(0);
+  });
+} 

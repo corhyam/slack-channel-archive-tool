@@ -1,5 +1,12 @@
 # Slack 私有频道归档工具
 
+<div align="center">
+
+[![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README_EN.md)
+[![中文](https://img.shields.io/badge/Language-中文-green?style=for-the-badge)](README.md)
+
+</div>
+
 一个现代化的 Web 应用，帮助用户安全地归档 Slack 私有频道。该工具提供了直观的用户界面，支持 OAuth 授权、频道列表查看、批量选择和归档操作。
 
 ## 功能特性
@@ -19,6 +26,11 @@
 - **API**: Slack Web API
 - **样式**: 现代化 CSS + Font Awesome 图标
 
+## 环境要求
+
+- **Node.js**: >= 18.17.0
+- **npm**: >= 8.0.0
+
 ## 安装和配置
 
 ### 1. 克隆项目
@@ -30,7 +42,13 @@ cd slack-archive-tool
 
 ### 2. 安装依赖
 
+**确保您使用的是支持的 Node.js 版本**：
+
 ```bash
+# 检查 Node.js 版本
+node --version  # 应该显示 v18.17.0 或更高版本
+
+# 安装依赖
 npm install
 ```
 
@@ -40,15 +58,25 @@ npm install
 2. 点击 "Create New App" → "From scratch"
 3. 输入应用名称和选择工作区
 4. 在 "OAuth & Permissions" 页面配置：
-   - **Redirect URLs**: `http://localhost:3000/auth/callback`
+   - **Redirect URLs**: `https://localhost:3000/auth/callback` ⚠️ **必须使用 HTTPS**
    - **Scopes**: 添加以下权限
      - `channels:read` - 读取公开频道信息
      - `groups:read` - 读取私有频道信息
      - `channels:write` - 管理公开频道
      - `groups:write` - 管理私有频道
 
+**重要**: Slack OAuth 2.0 强制要求回调 URL 必须是 HTTPS 协议。
+
 ### 4. 配置环境变量
 
+#### 本地开发环境
+复制 `env.local.example` 文件为 `.env`：
+
+```bash
+cp env.local.example .env
+```
+
+#### 生产环境
 复制 `env.example` 文件为 `.env`：
 
 ```bash
@@ -57,6 +85,7 @@ cp env.example .env
 
 编辑 `.env` 文件，填入您的 Slack App 配置：
 
+**本地开发配置**：
 ```env
 # Slack App 配置
 SLACK_CLIENT_ID=your_slack_client_id
@@ -65,30 +94,51 @@ SLACK_REDIRECT_URI=https://localhost:3000/auth/callback
 
 # 服务器配置
 PORT=3000
-
-# 加密密钥（可选，不设置会自动生成）
-# ENCRYPTION_KEY=your_32_byte_encryption_key
+NODE_ENV=development
+USE_HTTPS=true
 ```
 
-### 5. 配置 SSL 证书（本地开发）
+**生产环境配置**：
+```env
+# Slack App 配置
+SLACK_CLIENT_ID=your_slack_client_id
+SLACK_CLIENT_SECRET=your_slack_client_secret
+SLACK_REDIRECT_URI=https://your-domain.com/auth/callback
 
-由于 Slack OAuth 要求 HTTPS 回调，您需要生成本地 SSL 证书：
+# 服务器配置
+PORT=3000
+NODE_ENV=production
+USE_HTTPS=false
+```
+
+**注意**: 
+- 本地开发时 `SLACK_REDIRECT_URI` 使用 `https://localhost:3000/auth/callback`
+- 生产环境时 `SLACK_REDIRECT_URI` 使用您的实际域名
+- `USE_HTTPS` 在本地开发时设为 `true`，生产环境时设为 `false`
+
+### 5. 配置 SSL 证书（仅本地开发需要）
+
+**本地开发环境**：由于 Slack OAuth 2.0 强制要求 HTTPS 回调，您需要生成本地 SSL 证书：
 
 ```bash
 # 生成自签名证书
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
 ```
 
-**注意**: 生成的 `key.pem` 和 `cert.pem` 文件已被 `.gitignore` 忽略，不会上传到版本控制。
+**生产环境**：如果使用 Cloudflare 等代理服务，无需生成本地证书，设置 `USE_HTTPS=false` 即可。
+
+**注意**: 
+- 生成的 `key.pem` 和 `cert.pem` 文件已被 `.gitignore` 忽略，不会上传到版本控制
+- 本地开发时这是必要步骤，生产环境由代理服务处理 HTTPS
 
 ### 6. 启动应用
 
 ```bash
-# 启动 HTTPS 服务器（推荐）
-node server-https.js
+# 开发模式（自动重启）
+npm run dev
 
-# 或启动 HTTP 服务器（仅用于测试）
-node server.js
+# 生产模式
+npm start
 ```
 
 访问 `https://localhost:3000` 开始使用。
@@ -140,8 +190,7 @@ node server.js
 ### 项目结构
 ```
 slack-archive-tool/
-├── server.js              # HTTP 服务器（开发用）
-├── server-https.js        # HTTPS 服务器（生产用）
+├── server.js              # Express HTTPS 服务器
 ├── package.json           # 项目配置
 ├── package-lock.json      # 依赖锁定文件
 ├── .gitignore            # Git 忽略文件
@@ -178,16 +227,21 @@ slack-archive-tool/
 
 ### 常见问题
 
-1. **OAuth 授权失败**
+1. **Node.js 版本问题**
+   - 确保使用 Node.js 18.17.0 或更高版本
+   - 如果遇到 npm 语法错误，请升级 Node.js 版本
+   - 使用 `node --version` 检查当前版本
+
+2. **OAuth 授权失败**
    - 检查 Slack App 配置是否正确
    - 确认重定向 URL 匹配
    - 验证 Client ID 和 Secret
 
-2. **无法获取频道列表**
+3. **无法获取频道列表**
    - 确认 App 有正确的权限范围
    - 检查用户是否有访问私有频道的权限
 
-3. **归档操作失败**
+4. **归档操作失败**
    - 确认用户有归档频道的权限
    - 检查频道是否已经被归档
 
@@ -199,14 +253,6 @@ slack-archive-tool/
 DEBUG=* npm start
 ```
 
-## 贡献
-
-欢迎提交 Issue 和 Pull Request 来改进这个工具。
-
 ## 许可证
 
 MIT License
-
-## 免责声明
-
-此工具仅用于合法的频道管理目的。请确保您有权限对相关频道执行归档操作。使用本工具产生的任何后果由用户自行承担。 
