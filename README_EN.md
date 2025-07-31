@@ -5,6 +5,10 @@
 [![English](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](README_EN.md)
 [![中文](https://img.shields.io/badge/Language-中文-green?style=for-the-badge)](README.md)
 
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=for-the-badge)
+
 </div>
 
 Slack Private Channel Archive Tool helps users securely archive Slack private channels. This tool provides OAuth authorization, channel list management, batch selection, and archive operations. 
@@ -46,12 +50,21 @@ Results display after archive operation completion, including success/failure st
 
 ## Tech Stack
 
+![Node.js](https://img.shields.io/badge/Node.js-18.17.0+-green?style=for-the-badge)
+![Express](https://img.shields.io/badge/Express-4.x-blue?style=for-the-badge)
+![Slack API](https://img.shields.io/badge/Slack%20API-Web%20API-orange?style=for-the-badge)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge)
+![CSS3](https://img.shields.io/badge/CSS3-3.x-1572B6?style=for-the-badge&logo=css3)
+
 - **Backend**: Node.js + Express
 - **Frontend**: Vanilla JavaScript + CSS3
 - **API**: Slack Web API
 - **Styling**: CSS + Font Awesome icons
 
 ## Environment Requirements
+
+![Node.js](https://img.shields.io/badge/Node.js-18.17.0+-green?style=for-the-badge)
+![npm](https://img.shields.io/badge/npm-8.0.0+-red?style=for-the-badge&logo=npm)
 
 - **Node.js**: >= 18.17.0
 - **npm**: >= 8.0.0
