@@ -25,6 +25,25 @@ Slack Private Channel 归档工具，帮助用户安全地归档 Slack 私有频
 - 🎨 **现代化 UI** - 响应式设计，支持移动端访问
 - ⚡ **实时状态** - 显示频道状态（活跃/已归档）
 
+## 页面展示
+
+### 主页面
+![主页面第二版](screenshots/index_second_version.png)
+![主页面第一版](screenshots/index_first_version.png)
+应用的主页面，提供Slack授权入口和功能介绍。
+
+### 频道列表
+![频道列表](screenshots/channel_lists.png)
+显示所有可归档的私有频道，支持批量选择和查看频道详细信息。
+
+### 确认归档
+![确认归档](screenshots/comfirm_archive.png)
+归档操作前的确认页面，显示选中的频道列表供用户最终确认。
+
+### 归档结果
+![归档结果](screenshots/after_archive.png)
+归档操作完成后的结果展示，包含成功/失败统计和详细结果。
+
 ## 技术栈
 
 - **后端**: Node.js + Express
@@ -209,6 +228,7 @@ slack-archive-tool/
 ├── CONFIGURATION.md       # 配置说明文档
 ├── DEPLOYMENT.md          # 部署说明
 ├── LICENSE                # 许可证文件
+├── screenshots/           # 页面截图
 └── public/                # 静态文件
     ├── index.html         # 主页面
     ├── styles.css         # 样式文件

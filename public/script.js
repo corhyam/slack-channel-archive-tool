@@ -101,7 +101,7 @@ async function loadChannels() {
         
     } catch (error) {
         console.error('Failed to load channel list:', error);
-        showError(error.message);
+        showError('Failed to load channel list');
     } finally {
         showLoading(false);
     }
@@ -249,7 +249,7 @@ async function confirmArchive() {
         
     } catch (error) {
         console.error('归档操作错误:', error);
-        showError(error.message);
+        showError('Archive operation failed');
     } finally {
         archiveBtn.disabled = false;
         archiveBtn.innerHTML = '<i class="fas fa-archive"></i> Confirm Archive Selected Channels';
@@ -332,25 +332,19 @@ function closeErrorModal() {
 
 // 格式化日期
 function formatDate(timestamp) {
-    console.log('formatDate called with timestamp:', timestamp, 'type:', typeof timestamp);
-    
     if (!timestamp) {
-        console.log('timestamp is falsy, returning Unknown');
         return 'Unknown';
     }
     
     try {
         // 检查时间戳是否为数字
         const numTimestamp = typeof timestamp === 'string' ? parseInt(timestamp) : timestamp;
-        console.log('parsed timestamp:', numTimestamp);
         
         // 如果时间戳是秒级的，转换为毫秒
         const date = new Date(numTimestamp * 1000);
-        console.log('created date object:', date);
         
         // 检查日期是否有效
         if (isNaN(date.getTime())) {
-            console.log('date is invalid');
             return 'Invalid Date';
         }
         
@@ -361,10 +355,8 @@ function formatDate(timestamp) {
             hour: '2-digit',
             minute: '2-digit'
         });
-        console.log('formatted date:', formattedDate);
         return formattedDate;
     } catch (error) {
-        console.error('Date formatting error:', error, 'timestamp:', timestamp);
         return 'Date Error';
     }
 }

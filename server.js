@@ -136,9 +136,8 @@ app.get('/auth/callback', async (req, res) => {
       return res.status(400).json({ error: 'OAuth 授权失败 - 没有获取到 token' });
     }
     
-    console.log('Team ID:', team?.id);
     console.log('User ID:', authed_user?.id);
-    console.log('Token 类型:', access_token.startsWith('xoxp') ? 'User Token' : access_token.startsWith('xoxb') ? 'Bot Token' : 'Unknown');
+    console.log('✅ 授权成功，正在处理...');
     
     // 加密 token 并生成安全 ID
     const encryptedToken = encryptToken(access_token);
@@ -152,7 +151,7 @@ app.get('/auth/callback', async (req, res) => {
       created_at: Date.now()
     });
 
-    console.log('Token ID 已生成:', secureTokenId);
+    console.log('✅ 安全 Token ID 已生成');
     res.redirect(`/?token_id=${secureTokenId}`);
   } catch (error) {
     console.error('OAuth 回调错误:', error);
@@ -181,10 +180,7 @@ app.get('/api/channels', async (req, res) => {
 
     const decryptedToken = decryptToken(tokenData.encryptedToken);
     
-    console.log('Token 类型:', decryptedToken.startsWith('xoxp') ? 'User Token' : decryptedToken.startsWith('xoxb') ? 'Bot Token' : 'Unknown');
-
-    // 获取私有频道列表
-    console.log('正在获取频道列表...');
+    console.log('🔍 正在获取频道列表...');
     const channelsResponse = await axios.get('https://slack.com/api/conversations.list', {
       headers: {
         'Authorization': `Bearer ${decryptedToken}`
@@ -215,9 +211,8 @@ app.get('/api/channels', async (req, res) => {
       created: channel.created
     }));
 
-    console.log('总频道数量:', channelsResponse.data.channels.length);
-    console.log('当前用户创建的频道数量:', filteredChannels.length);
-    console.log('当前用户ID:', currentUserId);
+    console.log('📊 总频道数量:', channelsResponse.data.channels.length);
+    console.log('📋 当前用户创建的频道数量:', filteredChannels.length);
     res.json({ channels });
   } catch (error) {
     console.error('获取频道列表错误:', error);
@@ -268,7 +263,7 @@ app.post('/api/archive', async (req, res) => {
         results.push({
           channel_id: channelId,
           success: false,
-          error: error.message
+          error: 'Archive operation failed for this channel'
         });
       }
     }
@@ -280,23 +275,26 @@ app.post('/api/archive', async (req, res) => {
   }
 });
 
-// 临时调试端点 - 显示完整 token（仅用于测试）
-app.get('/debug/token/:tokenId', (req, res) => {
-  const { tokenId } = req.params;
-  const tokenData = tokenStore.get(tokenId);
-  
-  if (!tokenData) {
-    return res.status(404).json({ error: 'Token 不存在' });
-  }
-  
-  const decryptedToken = decryptToken(tokenData.encryptedToken);
-  res.json({
-    token: decryptedToken,
-    team_id: tokenData.team_id,
-    created_at: tokenData.created_at,
-    expires_at: tokenData.expires_at
+// 调试端点 - 仅在开发环境可用
+if (NODE_ENV === 'development') {
+  app.get('/debug/token/:tokenId', (req, res) => {
+    const { tokenId } = req.params;
+    const tokenData = tokenStore.get(tokenId);
+    
+    if (!tokenData) {
+      return res.status(404).json({ error: 'Token 不存在' });
+    }
+    
+    // 只返回基本信息，不暴露敏感数据
+    res.json({
+      team_id: tokenData.team_id,
+      user_id: tokenData.user_id,
+      created_at: tokenData.created_at,
+      expires_at: tokenData.expires_at,
+      is_valid: Date.now() < tokenData.expires_at
+    });
   });
-});
+}
 
 // 定期清理过期的 token
 setInterval(() => {

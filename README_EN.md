@@ -25,6 +25,25 @@ Slack Private Channel Archive Tool helps users securely archive Slack private ch
 - 🎨 **Modern UI** - Responsive design, mobile-friendly
 - ⚡ **Real-time Status** - Shows channel status (active/archived)
 
+## Screenshots
+
+### Main Page
+![Main Page Second Version](screenshots/index_second_version.png)
+![Main Page First Version](screenshots/index_first_version.png)
+The main page of the application, providing Slack authorization entry and feature introduction.
+
+### Channel List
+![Channel List](screenshots/channel_lists.png)
+Displays all archivable private channels with batch selection and detailed channel information.
+
+### Confirm Archive
+![Confirm Archive](screenshots/comfirm_archive.png)
+Confirmation page before archive operation, showing selected channel list for final user confirmation.
+
+### Archive Results
+![Archive Results](screenshots/after_archive.png)
+Results display after archive operation completion, including success/failure statistics and detailed results.
+
 ## Tech Stack
 
 - **Backend**: Node.js + Express
@@ -208,6 +227,7 @@ slack-channel-archive-tool/
 ├── QUICKSTART_EN.md       # English quick start guide
 ├── DEPLOYMENT.md          # Deployment guide
 ├── LICENSE                # License file
+├── screenshots/           # Page screenshots
 └── public/                # Static files
     ├── index.html         # Main page
     ├── styles.css         # Style file
