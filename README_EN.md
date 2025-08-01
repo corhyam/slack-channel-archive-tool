@@ -246,6 +246,8 @@ slack-channel-archive-tool/
 ├── QUICKSTART.md          # Quick start guide
 ├── QUICKSTART_EN.md       # English quick start guide
 ├── CONFIGURATION.md       # Configuration guide
+├── CHANGELOG.md           # Changelog
+├── CHANGELOG_EN.md        # English changelog
 ├── DEPLOYMENT.md          # Deployment guide
 ├── LICENSE                # License file
 ├── screenshots/           # Page screenshots

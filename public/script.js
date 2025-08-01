@@ -11,6 +11,8 @@ const resultsSection = document.getElementById('results-section');
 
 const authBtn = document.getElementById('auth-btn');
 const refreshBtn = document.getElementById('refresh-btn');
+const selectAllBtn = document.getElementById('select-all-btn');
+const deselectAllBtn = document.getElementById('deselect-all-btn');
 const backBtn = document.getElementById('back-btn');
 const archiveBtn = document.getElementById('archive-btn');
 const newSessionBtn = document.getElementById('new-session-btn');
@@ -47,6 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function bindEventListeners() {
     authBtn.addEventListener('click', startAuth);
     refreshBtn.addEventListener('click', loadChannels);
+    selectAllBtn.addEventListener('click', selectAllChannels);
+    deselectAllBtn.addEventListener('click', deselectAllChannels);
     backBtn.addEventListener('click', showChannelsSection);
     archiveBtn.addEventListener('click', archiveSelectedChannels);
     newSessionBtn.addEventListener('click', startNewSession);
@@ -101,7 +105,7 @@ async function loadChannels() {
         
     } catch (error) {
         console.error('Failed to load channel list:', error);
-        showError('Failed to load channel list');
+        showError(error.message);
     } finally {
         showLoading(false);
     }
@@ -132,7 +136,10 @@ function renderChannelsList() {
                    ${selectedChannels.has(channel.id) ? 'checked' : ''}
                    onclick="toggleChannelSelection('${channel.id}'); event.stopPropagation()">
             <div class="channel-info">
-                <div class="channel-name">#${channel.name}</div>
+                <div class="channel-name">
+                    <i class="fas fa-lock channel-lock-icon"></i>
+                    ${channel.name}
+                </div>
                 <div class="channel-meta">
                     <div class="channel-status ${channel.is_archived ? 'archived' : 'active'}">
                         <i class="fas ${channel.is_archived ? 'fa-archive' : 'fa-circle'}"></i>
@@ -145,10 +152,6 @@ function renderChannelsList() {
                     <div>
                         <i class="fas fa-calendar"></i>
                         Created: ${formatDate(channel.created)}
-                    </div>
-                    <div>
-                        <i class="fas fa-user"></i>
-                        Creator: ${channel.creator || 'Unknown'}
                     </div>
                 </div>
             </div>
@@ -168,6 +171,22 @@ function toggleChannelSelection(channelId) {
     updateSummary();
 }
 
+// 全选频道
+function selectAllChannels() {
+    channels.forEach(channel => {
+        selectedChannels.add(channel.id);
+    });
+    renderChannelsList();
+    updateSummary();
+}
+
+// 反选频道
+function deselectAllChannels() {
+    selectedChannels.clear();
+    renderChannelsList();
+    updateSummary();
+}
+
 
 
 // 更新摘要信息
@@ -182,7 +201,7 @@ function updateSummary() {
         // 更新归档确认部分的选中频道摘要
         const selectedChannelsList = Array.from(selectedChannels).map(id => {
             const channel = channels.find(c => c.id === id);
-            return channel ? `#${channel.name}` : id;
+            return channel ? `<i class="fas fa-lock"></i> ${channel.name}` : id;
         });
         
         selectedChannelsSummary.innerHTML = `
@@ -211,7 +230,23 @@ async function archiveSelectedChannels() {
 
 // 显示确认弹框
 function showConfirmModal() {
-    confirmMessage.textContent = `Are you sure you want to archive ${selectedChannels.size} selected channels? This operation is irreversible!`;
+    confirmMessage.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <strong>Are you sure you want to archive ${selectedChannels.size} selected channels?</strong>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <strong>This operation will:</strong>
+        </div>
+        
+        <div style="margin-left: 20px; margin-bottom: 10px;">
+            1. Rename channels to <code>{channel_name}-archived-{YYYYMMDD}</code>
+        </div>
+        
+        <div style="margin-left: 20px; margin-bottom: 15px;">
+            2. Archive the channels (they will be read-only)
+        </div>
+    `;
     confirmArchiveModal.style.display = 'flex';
 }
 
@@ -249,7 +284,7 @@ async function confirmArchive() {
         
     } catch (error) {
         console.error('归档操作错误:', error);
-        showError('Archive operation failed');
+        showError(error.message);
     } finally {
         archiveBtn.disabled = false;
         archiveBtn.innerHTML = '<i class="fas fa-archive"></i> Confirm Archive Selected Channels';
@@ -280,15 +315,16 @@ function showArchiveResults(results) {
     if (results.length > 0) {
         resultsHtml += '<h4>Detailed Results:</h4>';
         results.forEach(result => {
-            const channel = channels.find(c => c.id === result.channel_id);
-            const channelName = channel ? `#${channel.name}` : result.channel_id;
+            const channelName = result.channel_name || result.channel_id;
             
             resultsHtml += `
                 <div class="result-item ${result.success ? 'success' : 'error'}">
                     <i class="fas ${result.success ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
                     <div>
-                        <div style="font-weight: 600;">${channelName}</div>
-                        ${result.error ? `<div style="font-size: 0.9rem; color: #6b7280;">${result.error}</div>` : ''}
+                        <div style="font-weight: 600;">
+                            <i class="fas fa-lock"></i> ${channelName}
+                        </div>
+                        ${result.error ? `<div style="font-size: 0.9rem; color: #dc3545; margin-top: 4px;">${result.error}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -332,19 +368,25 @@ function closeErrorModal() {
 
 // 格式化日期
 function formatDate(timestamp) {
+    console.log('formatDate called with timestamp:', timestamp, 'type:', typeof timestamp);
+    
     if (!timestamp) {
+        console.log('timestamp is falsy, returning Unknown');
         return 'Unknown';
     }
     
     try {
         // 检查时间戳是否为数字
         const numTimestamp = typeof timestamp === 'string' ? parseInt(timestamp) : timestamp;
+        console.log('parsed timestamp:', numTimestamp);
         
         // 如果时间戳是秒级的，转换为毫秒
         const date = new Date(numTimestamp * 1000);
+        console.log('created date object:', date);
         
         // 检查日期是否有效
         if (isNaN(date.getTime())) {
+            console.log('date is invalid');
             return 'Invalid Date';
         }
         
@@ -355,8 +397,10 @@ function formatDate(timestamp) {
             hour: '2-digit',
             minute: '2-digit'
         });
+        console.log('formatted date:', formattedDate);
         return formattedDate;
     } catch (error) {
+        console.error('Date formatting error:', error, 'timestamp:', timestamp);
         return 'Date Error';
     }
 }
