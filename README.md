@@ -246,6 +246,8 @@ slack-channel-archive-tool/
 ├── QUICKSTART.md          # 快速开始指南
 ├── QUICKSTART_EN.md       # 英文快速开始指南
 ├── CONFIGURATION.md       # 配置说明文档
+├── CHANGELOG.md           # 更新日志
+├── CHANGELOG_EN.md        # 英文更新日志
 ├── DEPLOYMENT.md          # 部署说明
 ├── LICENSE                # 许可证文件
 ├── screenshots/           # 页面截图

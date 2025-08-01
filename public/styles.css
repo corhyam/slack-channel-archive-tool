@@ -295,6 +295,17 @@ body {
     border-color: #c82333;
 }
 
+.btn-outline {
+    background: transparent;
+    border: 1px solid #4a154b;
+    color: #4a154b;
+}
+
+.btn-outline:hover {
+    background: #4a154b;
+    color: white;
+}
+
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -304,9 +315,16 @@ body {
 /* 控制按钮组 */
 .controls {
     display: flex;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
+    gap: 10px;
     flex-wrap: wrap;
+}
+
+.selection-controls {
+    display: flex;
+    gap: 10px;
 }
 
 /* 加载状态 */
@@ -369,6 +387,14 @@ body {
     font-size: 1rem;
     color: #24292e;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.channel-lock-icon {
+    color: #6b7280;
+    font-size: 0.9rem;
 }
 
 .channel-meta {
@@ -495,7 +521,7 @@ body {
 .modal-content {
     background: white;
     border-radius: 8px;
-    max-width: 480px;
+    max-width: 600px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;

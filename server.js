@@ -11,7 +11,8 @@ const PORT = process.env.PORT || 3000;
 
 // 环境检测
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const USE_HTTPS = process.env.USE_HTTPS === 'true' || NODE_ENV === 'development';
+// 本地开发时可以使用 HTTPS，生产环境默认使用 HTTP
+const USE_HTTPS = process.env.USE_HTTPS === 'true' && NODE_ENV === 'development';
 
 // SSL 证书配置（仅本地开发时使用）
 let httpsOptions = null;
@@ -22,9 +23,7 @@ if (USE_HTTPS && NODE_ENV === 'development') {
       cert: fs.readFileSync('./cert.pem')
     };
   } catch (error) {
-    console.warn('⚠️  未找到 SSL 证书文件，请运行以下命令生成：');
-    console.warn('   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes');
-    console.warn('   或者设置 USE_HTTPS=false 使用 HTTP 模式');
+    console.warn('⚠️  未找到 SSL 证书文件');
   }
 }
 
@@ -81,6 +80,19 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+// 健康探测接口
+app.get('/whoami', (req, res) => {
+  res.json({
+    service: 'slack-archive-tool',
+    version: '1.0.0',
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: NODE_ENV,
+    port: PORT
+  });
+});
+
 // OAuth 授权页面
 app.get('/auth', (req, res) => {
   const SLACK_CLIENT_ID = process.env.SLACK_CLIENT_ID;
@@ -120,11 +132,11 @@ app.get('/auth/callback', async (req, res) => {
     );
 
     if (!tokenResponse.data.ok) {
-      console.error('Slack OAuth 错误:', tokenResponse.data);
+      console.error('❌ Slack OAuth 授权失败:', tokenResponse.data.error);
       return res.status(400).json({ error: 'OAuth 授权失败', details: tokenResponse.data.error });
     }
 
-    console.log('✅ OAuth 授权成功!');
+
     
     const { authed_user, team } = tokenResponse.data;
     
@@ -136,8 +148,9 @@ app.get('/auth/callback', async (req, res) => {
       return res.status(400).json({ error: 'OAuth 授权失败 - 没有获取到 token' });
     }
     
-    console.log('User ID:', authed_user?.id);
-    console.log('✅ 授权成功，正在处理...');
+    // 安全日志：不输出敏感信息
+    console.log('✅ OAuth 授权成功');
+    console.log('📋 用户信息已获取');
     
     // 加密 token 并生成安全 ID
     const encryptedToken = encryptToken(access_token);
@@ -151,7 +164,7 @@ app.get('/auth/callback', async (req, res) => {
       created_at: Date.now()
     });
 
-    console.log('✅ 安全 Token ID 已生成');
+    console.log('🔐 安全 Token ID 已生成');
     res.redirect(`/?token_id=${secureTokenId}`);
   } catch (error) {
     console.error('OAuth 回调错误:', error);
@@ -180,7 +193,10 @@ app.get('/api/channels', async (req, res) => {
 
     const decryptedToken = decryptToken(tokenData.encryptedToken);
     
-    console.log('🔍 正在获取频道列表...');
+    console.log('🔑 Token 验证成功');
+
+    // 获取私有频道列表
+    console.log('正在获取频道列表...');
     const channelsResponse = await axios.get('https://slack.com/api/conversations.list', {
       headers: {
         'Authorization': `Bearer ${decryptedToken}`
@@ -202,17 +218,37 @@ app.get('/api/channels', async (req, res) => {
       return channel.creator === currentUserId;
     });
 
+    // 获取当前用户信息
+    let creatorName = 'Unknown';
+    try {
+      const userResponse = await axios.get('https://slack.com/api/users.info', {
+        headers: {
+          'Authorization': `Bearer ${decryptedToken}`
+        },
+        params: {
+          user: currentUserId
+        }
+      });
+
+      if (userResponse.data.ok && userResponse.data.user) {
+        creatorName = userResponse.data.user.real_name || userResponse.data.user.name || 'Unknown';
+      }
+    } catch (error) {
+      console.warn('获取用户信息失败，使用默认值:', error.message);
+    }
+
     const channels = filteredChannels.map(channel => ({
       id: channel.id,
       name: channel.name,
       num_members: channel.num_members,
       is_archived: channel.is_archived,
-      creator: channel.creator,
+      creator: creatorName,
       created: channel.created
     }));
 
     console.log('📊 总频道数量:', channelsResponse.data.channels.length);
-    console.log('📋 当前用户创建的频道数量:', filteredChannels.length);
+    console.log('👤 当前用户创建的频道数量:', filteredChannels.length);
+    console.log('✅ 用户信息验证完成');
     res.json({ channels });
   } catch (error) {
     console.error('获取频道列表错误:', error);
@@ -242,8 +278,51 @@ app.post('/api/archive', async (req, res) => {
     const decryptedToken = decryptToken(tokenData.encryptedToken);
     const results = [];
 
+    // 首先获取频道信息
+    const channelsResponse = await axios.get('https://slack.com/api/conversations.list', {
+      headers: {
+        'Authorization': `Bearer ${decryptedToken}`
+      },
+      params: {
+        types: 'private_channel',
+        exclude_archived: true
+      }
+    });
+
+    const allChannels = channelsResponse.data.ok ? channelsResponse.data.channels : [];
+
     for (const channelId of channel_ids) {
       try {
+        // 首先重命名频道
+        const channel = allChannels.find(c => c.id === channelId);
+        if (channel) {
+          const now = new Date();
+          const dateStr = now.toISOString().split('T')[0].replace(/-/g, ''); // 格式: YYYYMMDD
+          const newName = `${channel.name}-archived-${dateStr}`;
+          
+          console.log(`🔄 重命名频道: ${channel.name} -> ${newName}`);
+          
+          const renameResponse = await axios.post('https://slack.com/api/conversations.rename', 
+            { 
+              channel: channelId,
+              name: newName
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${decryptedToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+          if (!renameResponse.data.ok) {
+            console.warn(`⚠️ 重命名频道失败: ${channel.name}`, renameResponse.data.error);
+          } else {
+            console.log(`✅ 频道重命名成功: ${channel.name} -> ${newName}`);
+          }
+        }
+
+        // 然后归档频道
         const archiveResponse = await axios.post('https://slack.com/api/conversations.archive', 
           { channel: channelId },
           {
@@ -256,14 +335,17 @@ app.post('/api/archive', async (req, res) => {
 
         results.push({
           channel_id: channelId,
+          channel_name: channel ? channel.name : 'Unknown',
           success: archiveResponse.data.ok,
           error: archiveResponse.data.error || null
         });
       } catch (error) {
         results.push({
           channel_id: channelId,
+          channel_name: 'Unknown',
+          new_name: 'Unknown',
           success: false,
-          error: 'Archive operation failed for this channel'
+          error: error.message
         });
       }
     }
@@ -275,26 +357,7 @@ app.post('/api/archive', async (req, res) => {
   }
 });
 
-// 调试端点 - 仅在开发环境可用
-if (NODE_ENV === 'development') {
-  app.get('/debug/token/:tokenId', (req, res) => {
-    const { tokenId } = req.params;
-    const tokenData = tokenStore.get(tokenId);
-    
-    if (!tokenData) {
-      return res.status(404).json({ error: 'Token 不存在' });
-    }
-    
-    // 只返回基本信息，不暴露敏感数据
-    res.json({
-      team_id: tokenData.team_id,
-      user_id: tokenData.user_id,
-      created_at: tokenData.created_at,
-      expires_at: tokenData.expires_at,
-      is_valid: Date.now() < tokenData.expires_at
-    });
-  });
-}
+// 安全说明：调试端点已移除，避免敏感信息泄露
 
 // 定期清理过期的 token
 setInterval(() => {
@@ -313,9 +376,6 @@ if (USE_HTTPS && httpsOptions) {
   
   httpsServer.listen(PORT, () => {
     console.log(`🚀 Slack 频道归档工具已启动`);
-    console.log(`🔒 HTTPS 服务器运行在 https://localhost:${PORT}`);
-    console.log('📋 请确保已配置 .env 文件中的 Slack App 凭据');
-    console.log('⚠️  注意：浏览器可能会显示安全警告，请点击"高级"→"继续访问"');
     console.log('🔗 访问 https://localhost:3000 开始使用');
   });
 
@@ -331,10 +391,7 @@ if (USE_HTTPS && httpsOptions) {
   // 生产环境 HTTP 模式（由 Cloudflare 等代理处理 HTTPS）
   app.listen(PORT, () => {
     console.log(`🚀 Slack 频道归档工具已启动`);
-    console.log(`🌐 HTTP 服务器运行在 http://localhost:${PORT}`);
-    console.log('📋 请确保已配置 .env 文件中的 Slack App 凭据');
-    console.log('🔗 通过 Cloudflare 代理访问您的域名');
-    console.log(`💡 本地访问: http://localhost:${PORT}`);
+    console.log(`💡 本地访问: http://localhost:3000`);
   });
 
   // 处理进程退出
